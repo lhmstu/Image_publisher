@@ -11,12 +11,19 @@
 #include <map>
 using namespace std;
 
+
+//struct frame
+struct FRAME
+{
+	string rgb,depth;
+};
+
 //load the parameter class
 class ParameterReader
 {
 public:
 		map<string, string> data;
-		ParameterReader( string filename="/home/lhmstu/image/src/image_publisher/parameter.txt")
+		ParameterReader( string filename="/home/lhmstu/Image_publisher/src/image_publisher/parameter.txt")
 		{
 			ifstream fin( filename.c_str() );
 			if(!fin)

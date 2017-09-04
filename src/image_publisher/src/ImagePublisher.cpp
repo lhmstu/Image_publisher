@@ -7,6 +7,8 @@
 #include <sstream>
 #include "image_publisher/ParameterReader.h"
 
+//give index , to load frame data
+FRAME readFrame( int index, ParameterReader& pd );
 
 int main(int argc, char** argv)
 {
@@ -23,18 +25,52 @@ int main(int argc, char** argv)
   cout << "startIndex = " << startIndex << endl;
   cout << "endIndex = " << endIndex << endl;
 
-  int currIndex = startIndex;
+  int currIndex = startIndex; // current index is currIndex
+  //FRAME lastFrame = readFrame( currIndex, pd); //compute currFrame to lastFrame
   // init image_transport object : rgb_transport
   image_transport::ImageTransport rgb_transport(nh);
-  image_transport::Publisher pub_rgb = rgb_transport.advertise("camera/rgb/image", 10); // topic : camera/rgb/image
-  cv::Mat image_rgb = cv::imread(argv[1], CV_LOAD_IMAGE_COLOR);
-  cv::waitKey(30);
-  sensor_msgs::ImagePtr msg_rgb = cv_bridge::CvImage(std_msgs::Header(), "bgr8", image_rgb).toImageMsg();
+  image_transport::Publisher pub_rgb = rgb_transport.advertise("camera/rgb/image", 1); // topic : camera/rgb/image
 
-  ros::Rate loop_rate(5);
-  while (nh.ok()) {
-    pub_rgb.publish(msg_rgb);
-    ros::spinOnce();
-    loop_rate.sleep();
+  image_transport::ImageTransport rgb_transport(nh);
+  image_transport::Publisher pub_depth = depth_transport.advertise("camera/depth/image", 1); // topic : camera/depth/image
+    for( currIndex = startIndex; currIndex <= endIndex; currIndex++)
+    {
+      cout << "Reading files : " << currIndex << endl;
+      FRAME currFrame = readFrame( currIndex, pd ); // load currFrame (rgb.png & depth.png)
+      cv::Mat image_rgb = cv::imread(currFrame.rgb, CV_LOAD_IMAGE_COLOR);
+      cv::waitKey(100);
+      sensor_msgs::ImagePtr msg_rgb = cv_bridge::CvImage(std_msgs::Header(), "bgr8", image_rgb).toImageMsg();
+      ros::Rate loop_rate(5);
+      if(nh.ok())
+      {
+        pub_rgb.publish(msg_rgb);
+        ros::spinOnce();
+        loop_rate.sleep();
+      }
   }
+}
+
+//give index , to load frame data (rgb.png & depth.png)
+FRAME readFrame(int index, ParameterReader& pd)
+{
+	FRAME f ;
+	string rgbDir = pd.getData("rgb_dir");
+	string depthDir = pd.getData("depth_dir");
+
+	string rgbExt = pd.getData("rgb_extension");
+	string depthExt = pd.getData("depth_extension");
+
+	stringstream ss;
+	ss<<rgbDir<<index<<rgbExt;
+	string filename;
+	ss>>filename;
+	f.rgb = filename;
+
+	ss.clear();
+	filename.clear();
+	ss<<depthDir<<index<<depthExt;
+	ss>>filename;
+	f.depth = filename;
+	
+	return f ; 
 }
