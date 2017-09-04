@@ -31,19 +31,22 @@ int main(int argc, char** argv)
   image_transport::ImageTransport rgb_transport(nh);
   image_transport::Publisher pub_rgb = rgb_transport.advertise("camera/rgb/image", 1); // topic : camera/rgb/image
 
-  image_transport::ImageTransport rgb_transport(nh);
+  image_transport::ImageTransport depth_transport(nh);
   image_transport::Publisher pub_depth = depth_transport.advertise("camera/depth/image", 1); // topic : camera/depth/image
     for( currIndex = startIndex; currIndex <= endIndex; currIndex++)
     {
       cout << "Reading files : " << currIndex << endl;
       FRAME currFrame = readFrame( currIndex, pd ); // load currFrame (rgb.png & depth.png)
       cv::Mat image_rgb = cv::imread(currFrame.rgb, CV_LOAD_IMAGE_COLOR);
+      cv::Mat image_depth = cv::imread(currFrame.depth, CV_LOAD_IMAGE_COLOR);
       cv::waitKey(100);
       sensor_msgs::ImagePtr msg_rgb = cv_bridge::CvImage(std_msgs::Header(), "bgr8", image_rgb).toImageMsg();
+      sensor_msgs::ImagePtr msg_depth = cv_bridge::CvImage(std_msgs::Header(), "bgr8", image_depth).toImageMsg();
       ros::Rate loop_rate(5);
       if(nh.ok())
       {
         pub_rgb.publish(msg_rgb);
+        pub_depth.publish(msg_depth);
         ros::spinOnce();
         loop_rate.sleep();
       }
@@ -68,7 +71,7 @@ FRAME readFrame(int index, ParameterReader& pd)
 
 	ss.clear();
 	filename.clear();
-	ss<<depthDir<<index<<depthExt;
+	ss<<depthDir<<"DeepImage_"<<index<<depthExt;
 	ss>>filename;
 	f.depth = filename;
 	
