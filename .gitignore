@@ -1,0 +1,4 @@
+*.png
+*.cmake
+build/
+devel/

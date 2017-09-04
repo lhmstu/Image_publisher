@@ -1,0 +1,12 @@
+# this is a parameter file
+# define the parameter
+
+#start_index & end_index
+start_index=-40
+end_index=40
+
+#the directory about storing data
+rgb_dir=/home/lhmstu/image/src/image_publisher/data/rgbimage
+rgb_extension=.png
+depth_dir=/home/lhmstu/image/src/image_publisher/data/deepimage
+depth_extension=.png
